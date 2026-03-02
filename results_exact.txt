@@ -1,0 +1,137 @@
+
+████████████████████████████████████████████
+
+  YANNAKAKIS EXACT SEMI-JOIN IMPLEMENTATION
+  Chain Queries Only
+
+████████████████████████████████████████████
+
+
+==================================================
+TEST 1: Two-Relation Chain (Dangling Detection)
+==================================================
+
+[SETUP]
+  Customer(cid,name): 3 tuples
+  Order(oid,cid,amount): 3 tuples
+  Join: Customer.cid = Order.cid
+
+╔════════════════════════════════════════╗
+║   YANNAKAKIS CHAIN QUERY EXECUTION     ║
+╚════════════════════════════════════════╝
+
+[INPUT] Query: Customer -[cid = cid]-> Order
+
+[INPUT] Relations:
+  Customer: 3 tuples
+  Order: 3 tuples
+
+=== PHASE 1: BOTTOM-UP SEMI-JOIN REDUCTION ===
+
+[BU] Customer ⋉ Order (on cid = cid): 3 -> 2 tuples (33.3% pruned, 0.13 ms)
+
+
+[METRICS] Semi-Join Reduction Summary:
+Relation      | Before | After | Pruned | Time (ms)
+--------------|--------|-------|--------|----------
+Customer      |      3 |     2 |  33.3% |     0.13
+
+=== PHASE 3: FINAL JOIN ===
+
+[FJ] After joining Order: 2 -> 3 tuples
+
+[RESULT] Final: 3 tuples
+
+
+[VERIFICATION]
+Expected: 3 tuples (2 orders for Alice, 1 for Bob)
+Actual:   3 tuples
+✓ TEST 1 PASSED
+
+==================================================
+TEST 2: Three-Relation Chain
+==================================================
+
+[SETUP]
+  Customer(cid,name): 3 tuples
+  Order(oid,cid,amount): 3 tuples
+  Payment(pid,oid,status): 3 tuples
+  Chain: Customer -> Order -> Payment
+
+╔════════════════════════════════════════╗
+║   YANNAKAKIS CHAIN QUERY EXECUTION     ║
+╚════════════════════════════════════════╝
+
+[INPUT] Query: Customer -[cid = cid]-> Order -[oid = oid]-> Payment
+
+[INPUT] Relations:
+  Customer: 3 tuples
+  Order: 3 tuples
+  Payment: 3 tuples
+
+=== PHASE 1: BOTTOM-UP SEMI-JOIN REDUCTION ===
+
+[BU] Order ⋉ Payment (on oid = oid): 3 -> 3 tuples (0.0% pruned, 0.15 ms)
+[BU] Customer ⋉ Order (on cid = cid): 3 -> 2 tuples (33.3% pruned, 0.17 ms)
+
+
+[METRICS] Semi-Join Reduction Summary:
+Relation      | Before | After | Pruned | Time (ms)
+--------------|--------|-------|--------|----------
+Order         |      3 |     3 |   0.0% |     0.15
+Customer      |      3 |     2 |  33.3% |     0.17
+
+=== PHASE 3: FINAL JOIN ===
+
+[FJ] After joining Order: 2 -> 3 tuples
+[FJ] After joining Payment: 3 -> 3 tuples
+
+[RESULT] Final: 3 tuples
+
+
+[VERIFICATION]
+Expected: 3 tuples
+Actual:   3 tuples
+✓ TEST 2 PASSED
+
+==================================================
+TEST 3: Large Pruning (80% of tuples removed)
+==================================================
+
+[SETUP]
+  Customer(cid,name): 100 tuples
+  Order(oid,cid,amount): 20 tuples
+  Query: Customers with orders
+
+╔════════════════════════════════════════╗
+║   YANNAKAKIS CHAIN QUERY EXECUTION     ║
+╚════════════════════════════════════════╝
+
+[INPUT] Query: Customer -[cid = cid]-> Order
+
+[INPUT] Relations:
+  Customer: 100 tuples
+  Order: 20 tuples
+
+=== PHASE 1: BOTTOM-UP SEMI-JOIN REDUCTION ===
+
+[BU] Customer ⋉ Order (on cid = cid): 100 -> 20 tuples (80.0% pruned, 0.38 ms)
+
+
+[METRICS] Semi-Join Reduction Summary:
+Relation      | Before | After | Pruned | Time (ms)
+--------------|--------|-------|--------|----------
+Customer      |    100 |    20 |  80.0% |     0.38
+
+=== PHASE 3: FINAL JOIN ===
+
+[FJ] After joining Order: 20 -> 20 tuples
+
+[RESULT] Final: 20 tuples
+
+
+[VERIFICATION]
+Expected: 20 tuples (only customers 1-20)
+Actual:   20 tuples
+Pruning:  80% of customers removed (100 → 20)
+✓ TEST 3 PASSED

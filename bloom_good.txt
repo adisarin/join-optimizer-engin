@@ -1,0 +1,15 @@
+TEST 4: Approximate Semi-Join (Bloom) vs Exact
+==================================================
+
+[EXACT]
+Customer: 100 -> 20 (80.0% pruned), time 0.24 ms
+
+[BLOOM]
+Params: mBits=256, k=3
+Customer: 100 -> 20 (80.0% pruned), time 0.84 ms
+
+[COMPARISON]
+Exact after-size: 20
+Bloom after-size: 20
+Extra tuples kept due to false positives: 0
+✓ Bloom produced >= exact (no false negatives observed)
