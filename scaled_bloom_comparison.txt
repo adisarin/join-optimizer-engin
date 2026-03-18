@@ -1,0 +1,11 @@
+TEST 9: Scaled Bloom Filter Comparison
+==================================================
+mBits | ExactOrd | TransferOrd | ExtraOrd | ExactCust | TransferCust | ExtraCust
+ 1024 |     1250 |        5000 |     3750 |      1250 |        50000 |     48750
+ 4096 |     1250 |        2130 |      880 |      1250 |        25878 |     24628
+16384 |     1250 |        1273 |       23 |      1250 |         1756 |       506
+65536 |     1250 |        1252 |        2 |      1250 |         1258 |         8
+
+[INTERPRETATION]
+As mBits increases, false positives should decrease,
+so TransferOrderAfter and TransferCustAfter should move closer to the exact baseline.
